@@ -33,7 +33,7 @@ python3 -m Experiments.Y.Y_X
 ``` 
 For example, to run Iterative Oblique Predictive Clustering Trees in the CartPole environment, run the following command:
 ```
-python3 -m Experiments.CartPole.CartPole_ITER_OPCT
+python3 -m Experiments.CartPole.CP_ITER_OPCT
 ```
 
 ## Results
