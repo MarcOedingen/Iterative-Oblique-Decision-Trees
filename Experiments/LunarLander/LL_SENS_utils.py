@@ -91,7 +91,9 @@ def plot_attract_ll(inode, opct, samples, pngfile, ttype):
     plot for each observation point whether it is attracted to or repelled from node inode's separating plane.
     In addition, draw the separating hyperplane as red line.
     """
-    observations = samples.values[:, 0:8]  # columns 'x', 'y', 'vx', 'vy', 'theta', 'omega', 'leg1', 'leg2' as np.array
+    observations = samples.values[
+        :, 0:8
+    ]  # columns 'x', 'y', 'vx', 'vy', 'theta', 'omega', 'leg1', 'leg2' as np.array
     e_utils.append_dist_cols(inode, opct, samples, observations)
     deltacol = f"delta{inode:02d}"
     planecol = f"plane{inode:02d}"
@@ -179,20 +181,20 @@ def plot_v_delta(inode, samples):
     offset = 50
     pngfile = f"png/v_delta{inode:02d}.png"
     plt.figure(
-        inode+offset, figsize=(7, 4.7)
+        inode + offset, figsize=(7, 4.7)
     )  # why inode? - each node should start a new figure
     sns.scatterplot(
         data=samples,
         x="vy",
         y=f"delta{inode:02d}",
-        #size=activcol,
+        # size=activcol,
         sizes=(10, 10),
-        #hue=planecol,
+        # hue=planecol,
         alpha=0.25,
         palette=None,
     )  # "Set2")#
     plt.savefig(pngfile, format="png", dpi=150)
-    plt.close(inode+offset)
+    plt.close(inode + offset)
 
 
 def plot_all_attract_ll(opct, samples, ttype="class"):
@@ -216,49 +218,57 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
         leafpcol = f"leafp{inode:02d}"
         activcol = f"activ{inode:02d}"
         samples[distcol] = dist
-        samples[leafpcol] = e_utils.obs_with_inode_active(observations, opct, inode, "class")
-        samples[activcol] = 1 - np.isnan(samples[leafpcol])     # 0: inactive, 1: active
-    colors = ['b', 'y', 'r', 'k']
-    clrs = [ colors[k] for k in samples["action"].to_numpy() ]
+        samples[leafpcol] = e_utils.obs_with_inode_active(
+            observations, opct, inode, "class"
+        )
+        samples[activcol] = 1 - np.isnan(samples[leafpcol])  # 0: inactive, 1: active
+    colors = ["b", "y", "r", "k"]
+    clrs = [colors[k] for k in samples["action"].to_numpy()]
     samples["clrs"] = clrs
-    actnames = ['none', 'left', 'main', 'right']
-    acts = [ actnames[k] for k in samples["action"].to_numpy() ]
+    actnames = ["none", "left", "main", "right"]
+    acts = [actnames[k] for k in samples["action"].to_numpy()]
     samples["actname"] = acts
     # samples["index"] = range(len(acts))
     samples["dummy"] = 1
 
 
-def plot_distance_ll(inodes, opct, samples: pd.DataFrame, pngdir, pngbase, prefix='LL_', ttype=None):
+def plot_distance_ll(
+    inodes, opct, samples: pd.DataFrame, pngdir, pngbase, prefix="LL_", ttype=None
+):
     # if os.path.exists(pngdir):
     #     shutil.rmtree(
     #         pngdir
     #     )  # delete all files in pngdir/ (otherwise a prior 'plane14.png' could remain)
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
-    observations = samples.values[:, 0:8]  # columns 'x', 'y', 'vx', 'vy', 'theta', 'omega', 'leg1', 'leg2' as np.array
+    observations = samples.values[
+        :, 0:8
+    ]  # columns 'x', 'y', 'vx', 'vy', 'theta', 'omega', 'leg1', 'leg2' as np.array
     append_multi_dist_cols(inodes, opct, samples, observations)
     epi_start, epi_end = e_utils.cut_episodes(samples)
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["t"] = range(nrow)
-        legend = ['auto', False, False]
+        legend = ["auto", False, False]
         fig, ax = plt.subplots(3, 1, sharex="all", figsize=(10, 8))
-        hue_order = ['none', 'left', 'main', 'right']
-        data1 = sample1.sort_values('actname', key=np.vectorize(hue_order.index))
+        hue_order = ["none", "left", "main", "right"]
+        data1 = sample1.sort_values("actname", key=np.vectorize(hue_order.index))
         # it is important to sort the data for Seaborn's hue_order, otherwise 'main' may get different colors in
         # different plots
         data1["action_"] = data1["action"]
         data1["action"] = data1["actname"]  # just to get 'action' in the legend
         for inode in inodes:
-            ax[inode].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)
+            ax[inode].plot(range(nrow), np.zeros(nrow), c="0.7", lw=0.5)
             activcol = f"activ{inode:02d}"
             ax[inode].set_ylabel(f"distance for node {inode:01d}")
 
-            #--- matplotlib version: has no easy way to legend ---
+            # --- matplotlib version: has no easy way to legend ---
             # ax[inode].scatter(sample1["index"], sample1[f"dist{inode:02d}"], c=sample1["clrs"].values, s=4)
 
-            #---  seaborn version: legend + nicer points ---
+            # ---  seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=data1,
                 x="t",
@@ -266,11 +276,11 @@ def plot_distance_ll(inodes, opct, samples: pd.DataFrame, pngdir, pngbase, prefi
                 hue="action",
                 hue_order=hue_order,
                 palette=None,
-                alpha=0.7,              # transparency, to see 'points behind'
+                alpha=0.7,  # transparency, to see 'points behind'
                 size=activcol,
                 sizes=(40, 10),
                 legend=legend[inode],
-                ax=ax[inode]
+                ax=ax[inode],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
         plt.savefig(filename, format="png", dpi=150)

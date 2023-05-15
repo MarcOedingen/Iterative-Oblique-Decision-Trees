@@ -8,7 +8,6 @@ import seaborn as sns
 import Experiments.utils as e_utils
 
 
-
 class Pend_EvalStrategy(e_utils.EvalStrategy):
     def __init__(self, reward_solved, n_tree_evaluation_eps):
         super().__init__(reward_solved, n_tree_evaluation_eps)
@@ -114,8 +113,12 @@ def plot3D_attract_pend(inode, opct, samples, pngfile, ttype):
     plot for each observation point whether it is attracted to or repelled from node inode's separating plane.
     In addition, draw the separating hyperplane as red line.
     """
-    observations = samples.values[:, 0:3]  # columns "theta_cos", "theta_sin", "omega" as np.array
-    e_utils.append_dist_cols(inode, opct, samples, observations, ttype="regr", epsilon=0.15)
+    observations = samples.values[
+        :, 0:3
+    ]  # columns "theta_cos", "theta_sin", "omega" as np.array
+    e_utils.append_dist_cols(
+        inode, opct, samples, observations, ttype="regr", epsilon=0.15
+    )
     deltacol = f"delta{inode:02d}"
     planecol = f"plane{inode:02d}"
     activcol = f"activ{inode:02d}"
@@ -231,12 +234,17 @@ def plot_attract_pend(inode, opct, samples, pngfile, ttype, xcol="theta", ycol="
 
     # append column "theta":
     samples["theta"] = np.arctan2(
-        np.float64(samples.theta_sin), np.float64(samples.theta_cos)
+        np.float64(samples.theta_sin),
+        np.float64(samples.theta_cos)
         # np.float64 important for numeric accuracy (!!)
     )
 
-    observations = samples.values[:, 0:3]  # columns "theta_cos", "theta_sin", "omega" as np.array
-    e_utils.append_dist_cols(inode, opct, samples, observations, ttype="regr", epsilon=0.15)
+    observations = samples.values[
+        :, 0:3
+    ]  # columns "theta_cos", "theta_sin", "omega" as np.array
+    e_utils.append_dist_cols(
+        inode, opct, samples, observations, ttype="regr", epsilon=0.15
+    )
     deltacol = f"delta{inode:02d}"
     planecol = f"plane{inode:02d}"
     leafpcol = f"leafp{inode:02d}"
@@ -327,8 +335,9 @@ def plot_all_project2d_pend(opct, samples, ttype="regr", xcol="theta", ycol="ome
         node = opct.trees[0][inode]
         if node.left != -1:  # if it is not a leaf node:
             pngfile = f"png/plane{inode:02d}.png"
-            samples = plot_attract_pend(inode, opct, samples, pngfile, ttype,
-                                        xcol=xcol, ycol=ycol)
+            samples = plot_attract_pend(
+                inode, opct, samples, pngfile, ttype, xcol=xcol, ycol=ycol
+            )
 
 
 def heatmap_pend(model, fignum, pngfile):
@@ -387,8 +396,10 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
         leafpcol = f"leafp{inode:02d}"
         activcol = f"activ{inode:02d}"
         samples[distcol] = dist
-        samples[leafpcol] = e_utils.obs_with_inode_active(observations, opct, inode, "class")
-        samples[activcol] = 1 - np.isnan(samples[leafpcol])     # 0: inactive, 1: active
+        samples[leafpcol] = e_utils.obs_with_inode_active(
+            observations, opct, inode, "class"
+        )
+        samples[activcol] = 1 - np.isnan(samples[leafpcol])  # 0: inactive, 1: active
     # colors = ['b', 'y', 'r', 'k']
     # clrs = [ colors[k] for k in samples["action"].to_numpy() ]
     # samples["clrs"] = clrs
@@ -399,13 +410,17 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
 
 
 def append_equilib_col(samples, observations):
-    pnt = np.array([1, 0, 0]).reshape((1, 3))  # the unstable equilibrium point theta=0 (cos(th)=1,sin(th)=0), omega=0
+    pnt = np.array([1, 0, 0]).reshape(
+        (1, 3)
+    )  # the unstable equilibrium point theta=0 (cos(th)=1,sin(th)=0), omega=0
     dist = np.float64(e_utils.get_dist_from_point(observations, pnt))
     samples["equilib"] = dist
     samples["activequi"] = 0 * dist + 1
 
 
-def plot_distance_pend(inodes, opct, samples, pngdir, pngbase, show_eq, prefix='PE_', ttype=None):
+def plot_distance_pend(
+    inodes, opct, samples, pngdir, pngbase, show_eq, prefix="PE_", ttype=None
+):
     """
     Generate distance plots for each node in ``inodes`` and each episode in ``samples``, colouring the points according
     to the actions taken.
@@ -428,20 +443,26 @@ def plot_distance_pend(inodes, opct, samples, pngdir, pngbase, show_eq, prefix='
     #     )  # delete all files in pngdir/ (otherwise a prior 'distp_14.png' could remain)
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
-    observations = samples.values[ :, 0:3]  # columns "theta_cos", "theta_sin", "omega" as np.array
+    observations = samples.values[
+        :, 0:3
+    ]  # columns "theta_cos", "theta_sin", "omega" as np.array
     append_multi_dist_cols(inodes, opct, samples, observations)
     append_equilib_col(samples, observations)
     epi_start, epi_end = e_utils.cut_episodes(samples)
     mean_last_dist = pd.DataFrame()
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["t"] = range(nrow)
-        sample1["action"] = np.round(sample1["action"],2)       # to get a nicer legend
+        sample1["action"] = np.round(sample1["action"], 2)  # to get a nicer legend
         distcols = [f"dist{inode:02d}" for inode in inodes] + ["equilib", "theta_sin"]
-        last50 = sample1.loc[epi_end[epi] - 50:epi_end[epi] - 1, distcols]
-        mean_last_dist = pd.concat([mean_last_dist, pd.DataFrame(last50.mean()).transpose()], axis=0)
-        legend = ['auto', False, False, False]
+        last50 = sample1.loc[epi_end[epi] - 50 : epi_end[epi] - 1, distcols]
+        mean_last_dist = pd.concat(
+            [mean_last_dist, pd.DataFrame(last50.mean()).transpose()], axis=0
+        )
+        legend = ["auto", False, False, False]
 
         # select the columns to plot
         ycol = [f"dist{inode:02d}" for inode in inodes]
@@ -460,35 +481,42 @@ def plot_distance_pend(inodes, opct, samples, pngdir, pngbase, show_eq, prefix='
         else:
             # the normal case: distance plot for each inode (len(inodes) subplots in one column):
             fig, ax = plt.subplots(len(inodes), 1, sharex="all", figsize=(10, 8))
-            if len(inodes) == 1: ax = [ax]
+            if len(inodes) == 1:
+                ax = [ax]
             numplots = len(inodes)
             ind_sub = [k for k in range(len(inodes))]
 
         for k in range(numplots):
             # inode = inodes[k]
-            ax[ind_sub[k]].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)       # plot the zero line
-            ax[ind_sub[k]].plot([64,64+1e-6],                                       # plot a vertical line at t=64
-                                [min(sample1[ycol[k]]),max(sample1[ycol[k]])], c='0.7', lw=0.5)
+            ax[ind_sub[k]].plot(
+                range(nrow), np.zeros(nrow), c="0.7", lw=0.5
+            )  # plot the zero line
+            ax[ind_sub[k]].plot(
+                [64, 64 + 1e-6],  # plot a vertical line at t=64
+                [min(sample1[ycol[k]]), max(sample1[ycol[k]])],
+                c="0.7",
+                lw=0.5,
+            )
 
             ax[ind_sub[k]].set_ylabel(ynam[k])
 
-            #--- seaborn version: legend + nicer points ---
+            # --- seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=sample1,
                 x="t",
                 y=ycol[k],
                 hue="action",
                 palette=None,
-                alpha=0.7,              # transparency, to see 'points behind'
+                alpha=0.7,  # transparency, to see 'points behind'
                 size=activcol[k],
                 sizes=(40, 10),
                 legend=legend[k],
-                ax=ax[ind_sub[k]]
+                ax=ax[ind_sub[k]],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
-        #red_patch = mlines.Line2D([], [], color='red', marker='o', label='right')
-        #blue_patch = mlines.Line2D([], [], color='blue', marker='o', label='none')
-        #plt.legend(handles=[red_patch,blue_patch])
+        # red_patch = mlines.Line2D([], [], color='red', marker='o', label='right')
+        # blue_patch = mlines.Line2D([], [], color='blue', marker='o', label='none')
+        # plt.legend(handles=[red_patch,blue_patch])
         plt.savefig(filename, format="png", dpi=150)
         print(f"Saved distance plot to {filename}")
         plt.close()

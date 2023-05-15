@@ -6,6 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import Experiments.utils as e_utils
 
+
 class AB_EvalStrategy(e_utils.EvalStrategy):
     def __init__(self, reward_solved, n_tree_evaluation_eps):
         super().__init__(reward_solved, n_tree_evaluation_eps)
@@ -167,7 +168,7 @@ def plot_v_delta(inode, samples):
     offset = 50
     pngfile = f"png/v_delta{inode:02d}.png"
     plt.figure(
-        inode+offset, figsize=(7, 4.7)
+        inode + offset, figsize=(7, 4.7)
     )  # why inode? - each node should start a new figure
     sns.scatterplot(
         data=samples,
@@ -180,7 +181,7 @@ def plot_v_delta(inode, samples):
         palette=None,
     )  # "Set2")#
     plt.savefig(pngfile, format="png", dpi=150)
-    plt.close(inode+offset)
+    plt.close(inode + offset)
 
 
 def plot_all_attract_ab(opct, samples, ttype="class"):
@@ -202,17 +203,17 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
         dist = np.float64(e_utils.get_dist_from_nodeplane(observations, opct, inode))
         distcol = f"dist{inode:02d}"
         samples[distcol] = dist
-    colors = ['b', 'r', 'k']
-    clrs = [ colors[k] for k in samples["action"].to_numpy() ]
+    colors = ["b", "r", "k"]
+    clrs = [colors[k] for k in samples["action"].to_numpy()]
     samples["clrs"] = clrs
-    actnames = ['-1', '0', '+1']
-    acts = [ actnames[k] for k in samples["action"].to_numpy() ]
+    actnames = ["-1", "0", "+1"]
+    acts = [actnames[k] for k in samples["action"].to_numpy()]
     samples["actions"] = acts
     # samples["index"] = range(len(acts))
     samples["dummy"] = 1
 
 
-def plot_distance_ab(inodes, opct, samples, pngdir, pngbase, prefix='AB_', ttype=None):
+def plot_distance_ab(inodes, opct, samples, pngdir, pngbase, prefix="AB_", ttype=None):
     # if os.path.exists(pngdir):
     #     shutil.rmtree(
     #         pngdir
@@ -224,25 +225,32 @@ def plot_distance_ab(inodes, opct, samples, pngdir, pngbase, prefix='AB_', ttype
     append_multi_dist_cols(inodes, opct, samples, observations)
     epi_start, epi_end = e_utils.cut_episodes(samples)
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["t"] = range(nrow)
-        legend = ['auto', False, False]
-        fig, ax = plt.subplots(len(inodes), 1, sharex="all", figsize=(10, 8/3*len(inodes)))
-        if len(inodes) == 1: ax = [ax]
-        hue_order = ['-1', '0', '+1']
-        data1 = sample1.sort_values('actions', key=np.vectorize(hue_order.index))
+        legend = ["auto", False, False]
+        fig, ax = plt.subplots(
+            len(inodes), 1, sharex="all", figsize=(10, 8 / 3 * len(inodes))
+        )
+        if len(inodes) == 1:
+            ax = [ax]
+        hue_order = ["-1", "0", "+1"]
+        data1 = sample1.sort_values("actions", key=np.vectorize(hue_order.index))
         # it is important to sort the data for Seaborn's hue_order, otherwise 'main' may get different colors in
         # different plots
         for i in range(len(inodes)):
             inode = inodes[i]
-            ax[i].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)       # plot the zero line
+            ax[i].plot(
+                range(nrow), np.zeros(nrow), c="0.7", lw=0.5
+            )  # plot the zero line
             ax[i].set_ylabel(f"distance for node {inode:01d}")
 
-            #--- matplotlib version: has no easy way to legend ---
+            # --- matplotlib version: has no easy way to legend ---
             # ax[i].scatter(sample1["index"], sample1[f"dist{inode:02d}"], c=sample1["clrs"].values, s=4)
 
-            #--- seaborn version: legend + nicer points ---
+            # --- seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=data1,
                 x="t",
@@ -250,11 +258,11 @@ def plot_distance_ab(inodes, opct, samples, pngdir, pngbase, prefix='AB_', ttype
                 hue="actions",
                 hue_order=hue_order,
                 palette=None,
-                alpha=0.7,              # transparency, to see 'points behind'
+                alpha=0.7,  # transparency, to see 'points behind'
                 # size="dummy",
                 sizes=(10, 10),
                 legend=legend[i],
-                ax=ax[i]
+                ax=ax[i],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
         plt.savefig(filename, format="png", dpi=150)

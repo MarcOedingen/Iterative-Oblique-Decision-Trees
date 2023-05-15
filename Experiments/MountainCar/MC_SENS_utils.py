@@ -16,7 +16,9 @@ class MyMonitor(Monitor):
         s, r, done, info = super().step(action)
         if done:
             sum_epi = sum(super().get_episode_lengths())
-            print(f"MyMonitor: sum(epi_lengths)={sum_epi}, total steps = {super().get_total_steps()} ")
+            print(
+                f"MyMonitor: sum(epi_lengths)={sum_epi}, total steps = {super().get_total_steps()} "
+            )
 
         return s, r, done, info
 
@@ -74,11 +76,13 @@ class MC_EvalStrategy(e_utils.EvalStrategy):
         """
         like self.eval_opct, but with a Monitor wrapper. Just to test Monitor wrapper
         """
-        mon_env = MyMonitor(env, filename="test_")      # logs to "test_monitor.csv"
+        mon_env = MyMonitor(env, filename="test_")  # logs to "test_monitor.csv"
 
         mean_m, std_m, samples = self.eval_opct(mon_env, opct, eps, sig)
 
-        assert sum(mon_env.get_episode_lengths()) == mon_env.get_total_steps(), "sum(episode lengths) != total steps"
+        assert (
+            sum(mon_env.get_episode_lengths()) == mon_env.get_total_steps()
+        ), "sum(episode lengths) != total steps"
         mon_env.close()
 
         return mean_m, std_m, samples
@@ -190,38 +194,40 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
         dist = np.float64(e_utils.get_dist_from_nodeplane(observations, opct, inode))
         distcol = f"dist{inode:02d}"
         samples[distcol] = dist
-    colors = ['b', 'y', 'r', 'k']
-    clrs = [ colors[k] for k in samples["action"].to_numpy() ]
+    colors = ["b", "y", "r", "k"]
+    clrs = [colors[k] for k in samples["action"].to_numpy()]
     samples["clrs"] = clrs
-    actnames = ['left', 'none', 'right']
-    acts = [ actnames[k] for k in samples["action"].to_numpy() ]
+    actnames = ["left", "none", "right"]
+    acts = [actnames[k] for k in samples["action"].to_numpy()]
     samples["actname"] = acts
 
 
-def plot_distance_mc(inodes, opct, samples, pngdir, pngbase, prefix='MC_', ttype=None):
+def plot_distance_mc(inodes, opct, samples, pngdir, pngbase, prefix="MC_", ttype=None):
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
     observations = samples.values[:, 0:2]  # columns 'position', 'velocity'  as np.array
     append_multi_dist_cols(inodes, opct, samples, observations)
     epi_start, epi_end = e_utils.cut_episodes(samples)
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["index"] = range(nrow)
-        legend = ['auto', False, False]
+        legend = ["auto", False, False]
         fig, ax = plt.subplots(2, 1, sharex="all", figsize=(10, 8))
-        hue_order = ['left', 'none', 'right']
-        data1 = sample1.sort_values('actname', key=np.vectorize(hue_order.index))
+        hue_order = ["left", "none", "right"]
+        data1 = sample1.sort_values("actname", key=np.vectorize(hue_order.index))
         # it is important to sort the data for Seaborn's hue_order, otherwise 'main' may get different colors in
         # different plots
         for i in range(len(inodes)):
             inode = inodes[i]
-            ax[i].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)
+            ax[i].plot(range(nrow), np.zeros(nrow), c="0.7", lw=0.5)
 
-            #--- matplotlib version: has no easy way to legend ---
+            # --- matplotlib version: has no easy way to legend ---
             # ax[i].scatter(sample1["index"], sample1[f"dist{inode:02d}"], c=sample1["clrs"].values, s=4)
 
-            #--- seaborn version: legend + nicer points ---
+            # --- seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=data1,
                 x="index",
@@ -229,10 +235,10 @@ def plot_distance_mc(inodes, opct, samples, pngdir, pngbase, prefix='MC_', ttype
                 hue="actname",
                 hue_order=hue_order,
                 palette=None,
-                alpha=0.5,              # transparency, to see 'points behind'
+                alpha=0.5,  # transparency, to see 'points behind'
                 sizes=(10, 10),
                 legend=legend[i],
-                ax=ax[i]
+                ax=ax[i],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
         plt.savefig(filename, format="png", dpi=150)

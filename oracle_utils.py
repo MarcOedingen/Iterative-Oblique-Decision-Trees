@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def evaluate_oracle_cp(model, env, num_episodes=100):
     positions = []
     velocities = []
@@ -33,6 +34,7 @@ def evaluate_oracle_cp(model, env, num_episodes=100):
         ),
         rewards,
     )
+
 
 def evaluate_oracle_cp_steps(model, env, num_samples=int(3e4)):
     positions = []
@@ -99,6 +101,7 @@ def evaluate_oracle_mc(model, env, num_episodes=100):
         rewards,
     )
 
+
 def evaluate_oracle_mcc(model, mcc_env, num_episodes=100):
     positions = []
     velocities = []
@@ -126,6 +129,7 @@ def evaluate_oracle_mcc(model, mcc_env, num_episodes=100):
         ),
         rewards,
     )
+
 
 def evaluate_oracle_mcc_steps(model, env, num_samples=int(3e4)):
     positions = []
@@ -194,6 +198,7 @@ def evaluate_oracle_cpsu(model, env, num_episodes=100):
         ),
         rewards,
     )
+
 
 def evaluate_oracle_ab_steps(model, env, num_samples=int(3e4)):
     theta1_cos = []
@@ -281,6 +286,7 @@ def evaluate_oracle_cpsu_steps(model, env, num_samples=int(3e4)):
         rewards,
     )
 
+
 def evaluate_oracle_ll_steps(model, env, num_samples=int(3e4)):
     xs = []
     ys = []
@@ -328,6 +334,7 @@ def evaluate_oracle_ll_steps(model, env, num_samples=int(3e4)):
         ),
         rewards,
     )
+
 
 def evaluate_oracle_mc_steps(model, env, num_samples=int(3e4)):
     positions = []
@@ -431,6 +438,7 @@ def evaluate_oracle_pend(model, env, num_episodes=100):
         ),
         rewards,
     )
+
 
 def evaluate_oracle_pend_steps(model, env, num_samples=int(3e4)):
     theta_cos = []
@@ -541,6 +549,7 @@ def evaluate_oracle_ll(model, env, num_episodes=100):
         rewards,
     )
 
+
 def evaluate_oracle_fixState(model, env, states, num_episodes=100):
     observations = []
     rewards = []
@@ -554,4 +563,4 @@ def evaluate_oracle_fixState(model, env, states, num_episodes=100):
             state, reward, done, _ = env.step(action)
             reward_sum += reward
         rewards.append(reward_sum)
-    return pd.DataFrame(observations, columns=['position', 'velocity']), rewards
+    return pd.DataFrame(observations, columns=["position", "velocity"]), rewards

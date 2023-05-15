@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from Initializing.Environments.LL_Init import LunarLanderBB
 from Initializing.Environments.CPSU_discrete import CartPoleSwingUpV1
 
+
 class EnvironmentStrategy(ABC):
     @abstractmethod
     def get_environmentShort(self):
@@ -16,6 +17,7 @@ class EnvironmentStrategy(ABC):
     def get_reward_threshold(self):
         pass
 
+
 class AcrobotEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
         return "ab"
@@ -26,6 +28,7 @@ class AcrobotEnvironment(EnvironmentStrategy):
     def get_reward_threshold(self):
         return -100
 
+
 class Cartpolev1Environment(EnvironmentStrategy):
     def get_environmentShort(self):
         return "cp"
@@ -35,6 +38,7 @@ class Cartpolev1Environment(EnvironmentStrategy):
 
     def get_reward_threshold(self):
         return 475
+
 
 class CartpoleSwingUpEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
@@ -48,6 +52,8 @@ class CartpoleSwingUpEnvironment(EnvironmentStrategy):
 
     def get_reward_threshold(self):
         return 840
+
+
 class MountainCarEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
         return "mc"
@@ -57,6 +63,7 @@ class MountainCarEnvironment(EnvironmentStrategy):
 
     def get_reward_threshold(self):
         return -110
+
 
 class MountainCarContinuousEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
@@ -68,6 +75,7 @@ class MountainCarContinuousEnvironment(EnvironmentStrategy):
     def get_reward_threshold(self):
         return 90
 
+
 class Pendulumv1Environment(EnvironmentStrategy):
     def get_environmentShort(self):
         return "pend"
@@ -77,6 +85,7 @@ class Pendulumv1Environment(EnvironmentStrategy):
 
     def get_reward_threshold(self):
         return -170
+
 
 class LunarLanderEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
@@ -90,14 +99,13 @@ class LunarLanderEnvironment(EnvironmentStrategy):
     def get_reward_threshold(self):
         return 200
 
+
 class LunarLandeBoundingBoxEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
         return "llbb"
 
     def get_environment(self):
-        return gym.wrappers.TimeLimit(
-            LunarLanderBB(), max_episode_steps=1000
-        )
+        return gym.wrappers.TimeLimit(LunarLanderBB(), max_episode_steps=1000)
 
     def get_reward_threshold(self):
         return 200

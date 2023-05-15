@@ -174,10 +174,10 @@ class LunarLander(gym.Env, EzPickle):
         self.moon.color1 = (0.0, 0.0, 0.0)
         self.moon.color2 = (0.0, 0.0, 0.0)
 
-        initial_y = state['y']
+        initial_y = state["y"]
         self.lander = self.world.CreateDynamicBody(
-            position=(state['x'], initial_y),
-            angle=state['theta'],
+            position=(state["x"], initial_y),
+            angle=state["theta"],
             fixtures=fixtureDef(
                 shape=polygonShape(
                     vertices=[(x / SCALE, y / SCALE) for x, y in LANDER_POLY]
@@ -193,8 +193,8 @@ class LunarLander(gym.Env, EzPickle):
         self.lander.color2 = (0.3, 0.3, 0.5)
         self.lander.ApplyForceToCenter(
             (
-                state['vx'],
-                state['vy'],
+                state["vx"],
+                state["vy"],
             ),
             True,
         )
@@ -202,8 +202,8 @@ class LunarLander(gym.Env, EzPickle):
         self.legs = []
         for i in [-1, +1]:
             leg = self.world.CreateDynamicBody(
-                position=(state['x'] - i * LEG_AWAY / SCALE, initial_y),
-                angle=(i * 0.05 + state['theta']),
+                position=(state["x"] - i * LEG_AWAY / SCALE, initial_y),
+                angle=(i * 0.05 + state["theta"]),
                 fixtures=fixtureDef(
                     shape=polygonShape(box=(LEG_W / SCALE, LEG_H / SCALE)),
                     density=1.0,
@@ -264,10 +264,10 @@ class LunarLander(gym.Env, EzPickle):
 
     def _random_step(self, state, action):
         self.render()
-        self.lander.position = b2Vec2(state['x'], state['y'])
-        self.lander.linearVelocity = b2Vec2(state['vx'], state['vy'])
-        self.lander.angle = state['theta']
-        self.lander.angularVelocity = state['theta_dot']
+        self.lander.position = b2Vec2(state["x"], state["y"])
+        self.lander.linearVelocity = b2Vec2(state["vx"], state["vy"])
+        self.lander.angle = state["theta"]
+        self.lander.angularVelocity = state["theta_dot"]
         self.render()
         pos = self.lander.position
         vel = self.lander.linearVelocity

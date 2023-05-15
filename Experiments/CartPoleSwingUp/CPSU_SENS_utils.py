@@ -75,7 +75,9 @@ def plot_attract_cpsu(inode, opct, samples, pngfile, ttype):
     plot for each observation point whether it is attracted to or repelled from node inode's separating plane.
     In addition, draw the separating hyperplane as red line.
     """
-    observations = samples.values[:, 0:5]  # columns 'position', 'velocity', 'angle_cos', 'angle_sin', 'angle_velocity'
+    observations = samples.values[
+        :, 0:5
+    ]  # columns 'position', 'velocity', 'angle_cos', 'angle_sin', 'angle_velocity'
     e_utils.append_dist_cols(inode, opct, samples, observations)
     deltacol = f"delta{inode:02d}"
     planecol = f"plane{inode:02d}"
@@ -163,7 +165,7 @@ def plot_v_delta(inode, samples):
     offset = 50
     pngfile = f"png/v_delta{inode:02d}.png"
     plt.figure(
-        inode+offset, figsize=(7, 4.7)
+        inode + offset, figsize=(7, 4.7)
     )  # why inode? - each node should start a new figure
     sns.scatterplot(
         data=samples,
@@ -176,7 +178,7 @@ def plot_v_delta(inode, samples):
         palette=None,
     )  # "Set2")#
     plt.savefig(pngfile, format="png", dpi=150)
-    plt.close(inode+offset)
+    plt.close(inode + offset)
 
 
 def plot_all_attract_cpsu(opct, samples, ttype="class"):
@@ -198,11 +200,11 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
         dist = np.float64(e_utils.get_dist_from_nodeplane(observations, opct, inode))
         distcol = f"dist{inode:02d}"
         samples[distcol] = dist
-    colors = ['b', 'y', 'r', 'k']
-    clrs = [ colors[k] for k in samples["action"].to_numpy() ]
+    colors = ["b", "y", "r", "k"]
+    clrs = [colors[k] for k in samples["action"].to_numpy()]
     samples["clrs"] = clrs
-    actionnames = ['left', 'none', 'right']
-    acts = [ actionnames[k] for k in samples["action"].to_numpy() ]
+    actionnames = ["left", "none", "right"]
+    acts = [actionnames[k] for k in samples["action"].to_numpy()]
     samples["actname"] = acts
     # samples["index"] = range(len(acts))
     samples["dummy"] = 1
@@ -210,13 +212,24 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
 
 def append_equilib_col(samples: pd.DataFrame, observations: np.ndarray):
     obs_w_o_pos = observations[:, 1:5]
-    pnt = np.array([0, 1, 0, 0]).reshape((1, 4))  # the unstable equilibrium point v=0, cos(th)=1, sin(th)=0, omega=0
+    pnt = np.array([0, 1, 0, 0]).reshape(
+        (1, 4)
+    )  # the unstable equilibrium point v=0, cos(th)=1, sin(th)=0, omega=0
     dist = np.float64(e_utils.get_dist_from_point(obs_w_o_pos, pnt))
     distcol = f"equilib"
     samples[distcol] = dist
 
 
-def plot_distance_cpsu(inodes, opct, samples: pd.DataFrame, pngdir, pngbase, show_eq, prefix='CPSU_', ttype=None):
+def plot_distance_cpsu(
+    inodes,
+    opct,
+    samples: pd.DataFrame,
+    pngdir,
+    pngbase,
+    show_eq,
+    prefix="CPSU_",
+    ttype=None,
+):
     """
     Generate distance plots for each node in ``inodes`` and each episode in ``samples``, colouring the points according
     to the actions taken.
@@ -239,17 +252,21 @@ def plot_distance_cpsu(inodes, opct, samples: pd.DataFrame, pngdir, pngbase, sho
     #     )  # delete all files in pngdir/ (otherwise a prior 'plane14.png' could remain)
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
-    observations = samples.values[:, 0:5]  # columns 'position', 'velocity', 'angle_cos', 'angle_sin', 'angle_velocity'
+    observations = samples.values[
+        :, 0:5
+    ]  # columns 'position', 'velocity', 'angle_cos', 'angle_sin', 'angle_velocity'
     append_multi_dist_cols(inodes, opct, samples, observations)
     append_equilib_col(samples, observations)
     epi_start, epi_end = e_utils.cut_episodes(samples)
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["t"] = range(nrow)
-        legend = ['auto', False, False, False]
-        hue_order = ['left', 'none', 'right']
-        data1 = sample1.sort_values('actname', key=np.vectorize(hue_order.index))
+        legend = ["auto", False, False, False]
+        hue_order = ["left", "none", "right"]
+        data1 = sample1.sort_values("actname", key=np.vectorize(hue_order.index))
         # it is important to sort the data for Seaborn's hue_order, otherwise 'main' may get different colors in
         # different plots
 
@@ -272,15 +289,18 @@ def plot_distance_cpsu(inodes, opct, samples: pd.DataFrame, pngdir, pngbase, sho
         else:
             # the normal case: distance plot for each inode:
             fig, ax = plt.subplots(len(inodes), 1, sharex="all", figsize=(10, 8))
-            if len(inodes) == 1: ax = [ax]
+            if len(inodes) == 1:
+                ax = [ax]
             numplots = len(inodes)
             ind_sub = [k for k in range(len(inodes))]
 
         for k in range(numplots):
             # inode = inodes[k]
-            ax[ind_sub[k]].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)      # plot the zero line
+            ax[ind_sub[k]].plot(
+                range(nrow), np.zeros(nrow), c="0.7", lw=0.5
+            )  # plot the zero line
 
-            #--- seaborn version: legend + nicer points ---
+            # --- seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=data1,
                 x="t",
@@ -288,11 +308,11 @@ def plot_distance_cpsu(inodes, opct, samples: pd.DataFrame, pngdir, pngbase, sho
                 hue="actname",
                 hue_order=hue_order,
                 palette=None,
-                alpha=0.5,              # transparency, to see 'points behind'
+                alpha=0.5,  # transparency, to see 'points behind'
                 # size="dummy",
                 sizes=(10, 10),
                 legend=legend[k],
-                ax=ax[ind_sub[k]]
+                ax=ax[ind_sub[k]],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
         plt.savefig(filename, format="png", dpi=150)

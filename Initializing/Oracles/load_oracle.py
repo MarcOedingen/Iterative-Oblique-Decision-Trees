@@ -2,13 +2,16 @@ import os
 from abc import ABC, abstractmethod
 from stable_baselines3 import DQN, PPO, TD3, DDPG
 
+
 def get_current_path():
     return os.path.dirname(os.path.realpath(__file__))
+
 
 class OracleStrategy(ABC):
     @abstractmethod
     def load_model(self, EnvironmentStrategy):
         pass
+
 
 class DQN_Oracle(OracleStrategy):
     def load_model(self, EnvironmentStrategy):

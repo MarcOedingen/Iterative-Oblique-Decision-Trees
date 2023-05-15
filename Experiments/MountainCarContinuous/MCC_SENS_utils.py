@@ -171,7 +171,9 @@ def append_multi_dist_cols(inodes, opct, samples, observations):
     # samples["actname"] = acts
 
 
-def plot_distance_mcc(inodes, opct, samples, pngdir, pngbase, prefix='MCC_', ttype=None):
+def plot_distance_mcc(
+    inodes, opct, samples, pngdir, pngbase, prefix="MCC_", ttype=None
+):
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
     observations = samples.values[:, 0:2]  # columns 'position', 'velocity'  as np.array
@@ -179,34 +181,38 @@ def plot_distance_mcc(inodes, opct, samples, pngdir, pngbase, prefix='MCC_', tty
     epi_start, epi_end = e_utils.cut_episodes(samples)
     mean_last_dist = pd.DataFrame()
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["index"] = range(nrow)
         distcols = [f"dist{inode:02d}" for inode in inodes]
-        last50 = sample1.loc[epi_end[epi] - 50:epi_end[epi] - 1, distcols]
-        mean_last_dist = pd.concat([mean_last_dist, pd.DataFrame(last50.mean()).transpose()], axis=0)
-        legend = ['auto', False, False]
+        last50 = sample1.loc[epi_end[epi] - 50 : epi_end[epi] - 1, distcols]
+        mean_last_dist = pd.concat(
+            [mean_last_dist, pd.DataFrame(last50.mean()).transpose()], axis=0
+        )
+        legend = ["auto", False, False]
         fig, ax = plt.subplots(2, 1, sharex="all", figsize=(10, 8))
 
         for i in range(len(inodes)):
             inode = inodes[i]
-            ax[i].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)
+            ax[i].plot(range(nrow), np.zeros(nrow), c="0.7", lw=0.5)
 
-            #--- matplotlib version: has no easy way to legend ---
+            # --- matplotlib version: has no easy way to legend ---
             # ax[i].scatter(sample1["index"], sample1[f"dist{inode:02d}"], c=sample1["clrs"].values, s=4)
 
-            #--- seaborn version: legend + nicer points ---
+            # --- seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=sample1,
                 x="index",
                 y=f"dist{inode:02d}",
                 hue="action",
-                #hue_order=hue_order,
+                # hue_order=hue_order,
                 palette=None,
-                alpha=0.5,              # transparency, to see 'points behind'
+                alpha=0.5,  # transparency, to see 'points behind'
                 sizes=(10, 10),
                 legend=legend[i],
-                ax=ax[i]
+                ax=ax[i],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
         plt.savefig(filename, format="png", dpi=150)

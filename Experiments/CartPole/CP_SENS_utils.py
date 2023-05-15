@@ -32,7 +32,8 @@ class CP_EvalStrategy(e_utils.EvalStrategy):
         for e in range(eps):
             s = env.reset()
             istep = 0
-            if type(s) is tuple: s = s[0]       # gym-0.26.2 returns a tuple (was nd.array before)
+            if type(s) is tuple:
+                s = s[0]  # gym-0.26.2 returns a tuple (was nd.array before)
             done = False
             while not done:
                 action = np.argmax(opct.predict(s.reshape(1, -1)), axis=1)[0]
@@ -69,12 +70,15 @@ class CP_EvalStrategy(e_utils.EvalStrategy):
         )
         return np.mean(m), np.std(m), samples
 
+
 def plot_attract_cp(inode, opct, samples, pngfile, ttype):
     """
     plot for each observation point whether it is attracted to or repelled from node inode's separating plane.
     In addition, draw the separating hyperplane as red line.
     """
-    observations = samples.values[:, 0:4]  # columns "position", "velocity", "angle", "angle_v" as np.array
+    observations = samples.values[
+        :, 0:4
+    ]  # columns "position", "velocity", "angle", "angle_v" as np.array
     e_utils.append_dist_cols(inode, opct, samples, observations)
     deltacol = f"delta{inode:02d}"
     planecol = f"plane{inode:02d}"
@@ -157,11 +161,12 @@ def plot_attract_cp(inode, opct, samples, pngfile, ttype):
     samples = e_utils.remove_dist_cols(inode, samples)
     return samples
 
+
 def plot_v_delta(inode, samples):
     offset = 50
     pngfile = f"png/v_delta{inode:02d}.png"
     plt.figure(
-        inode+offset, figsize=(7, 4.7)
+        inode + offset, figsize=(7, 4.7)
     )  # why inode? - each node should start a new figure
     sns.scatterplot(
         data=samples,
@@ -174,7 +179,7 @@ def plot_v_delta(inode, samples):
         palette=None,
     )  # "Set2")#
     plt.savefig(pngfile, format="png", dpi=150)
-    plt.close(inode+offset)
+    plt.close(inode + offset)
 
 
 def plot_all_attract_cp(opct, samples, ttype="class"):
@@ -189,49 +194,55 @@ def plot_all_attract_cp(opct, samples, ttype="class"):
             pngfile = f"png/plane{inode:02d}.png"
             samples = plot_attract_cp(inode, opct, samples, pngfile, ttype)
 
+
 def append_multi_dist_cols(inodes, opct, samples, observations):
     done_arr = samples["done"].values
     for inode in inodes:
         dist = np.float64(e_utils.get_dist_from_nodeplane(observations, opct, inode))
         distcol = f"dist{inode:02d}"
         samples[distcol] = dist
-    colors = ['b',  'r', 'k']
-    clrs = [ colors[k] for k in samples["action"].to_numpy() ]
+    colors = ["b", "r", "k"]
+    clrs = [colors[k] for k in samples["action"].to_numpy()]
     samples["clrs"] = clrs
-    actnames = ['left', 'right']
-    acts = [ actnames[k] for k in samples["action"].to_numpy() ]
+    actnames = ["left", "right"]
+    acts = [actnames[k] for k in samples["action"].to_numpy()]
     samples["actname"] = acts
-    #samples["index"] = range(len(acts))
+    # samples["index"] = range(len(acts))
     samples["dummy"] = 1
 
-def plot_distance_cp(inodes, opct, samples, pngdir, pngbase, prefix='CP_', ttype=None):
+
+def plot_distance_cp(inodes, opct, samples, pngdir, pngbase, prefix="CP_", ttype=None):
     # if os.path.exists(pngdir):
     #     shutil.rmtree(
     #         pngdir
     #     )  # delete all files in pngdir/ (otherwise a prior 'plane14.png' could remain)
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
-    observations = samples.values[:, 0:4]  # columns 'position', 'velocity', 'angle, 'angle_velocity'
+    observations = samples.values[
+        :, 0:4
+    ]  # columns 'position', 'velocity', 'angle, 'angle_velocity'
     append_multi_dist_cols(inodes, opct, samples, observations)
     epi_start, epi_end = e_utils.cut_episodes(samples)
     for epi in range(len(epi_start)):
-        sample1 = pd.DataFrame(samples[epi_start[epi]:epi_end[epi]])        # make a copy, not a slice
+        sample1 = pd.DataFrame(
+            samples[epi_start[epi] : epi_end[epi]]
+        )  # make a copy, not a slice
         nrow = sample1.shape[0]
         sample1["index"] = range(nrow)
-        legend = ['auto', False, False]
+        legend = ["auto", False, False]
         fig, ax = plt.subplots(3, 1, sharex="all", figsize=(10, 8))
-        hue_order = ['left', 'none', 'right']
-        data1 = sample1.sort_values('actname', key=np.vectorize(hue_order.index))
+        hue_order = ["left", "none", "right"]
+        data1 = sample1.sort_values("actname", key=np.vectorize(hue_order.index))
         # it is important to sort the data for Seaborn's hue_order, otherwise 'main' may get different colors in
         # different plots
         for i in range(len(inodes)):
             inode = inodes[i]
-            ax[i].plot(range(nrow), np.zeros(nrow), c='0.7', lw=0.5)
+            ax[i].plot(range(nrow), np.zeros(nrow), c="0.7", lw=0.5)
 
-            #--- matplotlib version: has no easy way to legend ---
+            # --- matplotlib version: has no easy way to legend ---
             # ax[i].scatter(sample1["index"], sample1[f"dist{inode:02d}"], c=sample1["clrs"].values, s=4)
 
-            #--- seaborn version: legend + nicer points ---
+            # --- seaborn version: legend + nicer points ---
             sns.scatterplot(
                 data=data1,
                 x="index",
@@ -239,14 +250,14 @@ def plot_distance_cp(inodes, opct, samples, pngdir, pngbase, prefix='CP_', ttype
                 hue="actname",
                 hue_order=hue_order,
                 palette=None,
-                alpha=0.5,              # transparency, to see 'points behind'
-                #size="dummy",
+                alpha=0.5,  # transparency, to see 'points behind'
+                # size="dummy",
                 sizes=(10, 10),
                 legend=legend[i],
-                ax=ax[i]
+                ax=ax[i],
             )
         filename = f"{pngdir}/{prefix}{pngbase}_{epi:02d}.png"
         plt.savefig(filename, format="png", dpi=150)
         print(f"Saved distance plot to {filename}")
         plt.close()
-    #plt.show()
+    # plt.show()

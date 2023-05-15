@@ -43,6 +43,7 @@ def save_best_opct(best_opcts, best_rewards, reward_threshold, env_name, method)
     ) as f:
         pickle.dump(best_opct, f)
 
+
 def save_best_cart(best_carts, best_rewards, reward_threshold, env_name, method):
     if not os.path.exists("Experiments/CARTs"):
         os.makedirs("Experiments/CARTs")
@@ -213,6 +214,7 @@ def make_opct_reg(samples, depth):
     dt.fit(X, y)
     return dt
 
+
 def make_cart_class(samples, depth):
     X = samples.loc[:, samples.columns != "action"].to_numpy()
     y = samples["action"].to_numpy()
@@ -220,12 +222,14 @@ def make_cart_class(samples, depth):
     dt.fit(X, y)
     return dt
 
+
 def make_cart_reg(samples, depth):
     X = samples.loc[:, samples.columns != "action"].to_numpy()
     y = samples["action"].to_numpy().reshape(-1, 1)
     dt = DecisionTreeRegressor(max_depth=depth)
     dt.fit(X, y)
     return dt
+
 
 def new_samples_continuous(oracle, best_samples, different, epsilon=0.1):
     o_actions = oracle.predict(best_samples.loc[:, best_samples.columns != "action"])[0]
@@ -253,6 +257,7 @@ def new_samples_discrete(oracle, best_samples, different):
         new_samples = best_samples.copy()
         new_samples["action"] = o_actions
     return new_samples
+
 
 def get_best_class_cart(
     num_trees, c_samples_iter, depth, env, t_eval_eps, new_samples_iter
@@ -311,7 +316,7 @@ def get_best_class_opct(
 
 
 def get_best_reg_cart(
-        num_trees, c_samples_iter, depth, env, t_eval_eps, new_samples_iter
+    num_trees, c_samples_iter, depth, env, t_eval_eps, new_samples_iter
 ):
     best_tree, best_samples, best_reward, best_std = (
         None,
@@ -337,6 +342,7 @@ def get_best_reg_cart(
                 np.std(tree_rewards),
             )
     return best_tree, best_samples, best_reward, best_std
+
 
 def get_best_reg_opct(
     num_trees, c_samples_iter, depth, env, t_eval_eps, new_samples_iter
@@ -366,6 +372,7 @@ def get_best_reg_opct(
             )
     return best_tree, best_samples, best_reward, best_std
 
+
 def eval_opct_class_fixState(env, opct, states, num_episodes=100):
     observations = []
     rewards = []
@@ -379,7 +386,8 @@ def eval_opct_class_fixState(env, opct, states, num_episodes=100):
             state, reward, done, _ = env.step(action)
             reward_sum += reward
         rewards.append(reward_sum)
-    return pd.DataFrame(observations, columns=['position', 'velocity']), rewards
+    return pd.DataFrame(observations, columns=["position", "velocity"]), rewards
+
 
 def eval_opct_class(opct, env, columns, num_episodes=100, new_samples=np.inf):
     observations = []
@@ -406,6 +414,7 @@ def eval_opct_class(opct, env, columns, num_episodes=100, new_samples=np.inf):
         samples = samples.sample(n=new_samples)
     return samples, rewards
 
+
 def eval_opct_reg_fixState(env, opct, states, num_episodes=100):
     observations = []
     rewards = []
@@ -419,7 +428,7 @@ def eval_opct_reg_fixState(env, opct, states, num_episodes=100):
             state, reward, done, _ = env.step(action)
             reward_sum += reward
         rewards.append(reward_sum)
-    return pd.DataFrame(observations, columns=['position', 'velocity']), rewards
+    return pd.DataFrame(observations, columns=["position", "velocity"]), rewards
 
 
 def eval_opct_reg(opct, env, columns, num_episodes=100, new_samples=np.inf):
@@ -448,6 +457,7 @@ def eval_opct_reg(opct, env, columns, num_episodes=100, new_samples=np.inf):
         samples = samples.sample(n=new_samples)
     return samples, rewards
 
+
 def eval_cart_class(tree, env, columns, num_episodes=100, new_samples=np.inf):
     observations = []
     actions = []
@@ -472,6 +482,7 @@ def eval_cart_class(tree, env, columns, num_episodes=100, new_samples=np.inf):
     if new_samples < len(samples):
         samples = samples.sample(n=new_samples)
     return samples, rewards
+
 
 def eval_cart_reg(tree, env, columns, num_episodes=100, new_samples=np.inf):
     observations = []
@@ -508,15 +519,18 @@ def signum0(val):
 
 
 def shape_df_res(np_res, row, dimname, std):
-    np_res = np_res[0:row, :]  # remove unused rows (happens if some elements of setzero are true)
+    np_res = np_res[
+        0:row, :
+    ]  # remove unused rows (happens if some elements of setzero are true)
 
-    df_res = pd.DataFrame(columns=['dim', 'xf', 'reward_mean', 'reward_std', 'dim_value'],
-                          data=np_res)
-    dimname.append('thresh')
-    df_res['dimname'] = [dimname[i] for i in np.int32(np_res[:, 0])]
+    df_res = pd.DataFrame(
+        columns=["dim", "xf", "reward_mean", "reward_std", "dim_value"], data=np_res
+    )
+    dimname.append("thresh")
+    df_res["dimname"] = [dimname[i] for i in np.int32(np_res[:, 0])]
     std2 = np.concatenate((std, [0]), axis=0)  # for last 'dimension' (thresh)
-    df_res['std'] = [std2[i] for i in np.int32(np_res[:, 0])]  # just diagnostics
-    df_res['dim'] = np.int32(df_res['dim'])
+    df_res["std"] = [std2[i] for i in np.int32(np_res[:, 0])]  # just diagnostics
+    df_res["dim"] = np.int32(df_res["dim"])
     return df_res
 
 
@@ -537,6 +551,7 @@ class SensitivityStrategy:
     - ``sensitivity_analysis`` (needed by ``generate_sens_pkls``) and
     - ``multi_node_sensitivity`` (needed by ``generate_multi_sens_pkls``)
     """
+
     def __init__(self, eval_strategy: EvalStrategy):
         self._evs = eval_strategy
 
@@ -548,10 +563,18 @@ class SensitivityStrategy:
     def multi_node_sensitivity(self, inodes, setzero=None):
         pass
 
-    def sensi_ana_V0(self, inode, setzero, dimname, lsize,
-                     env, best_tree, std,  # params for eval_opct
-                     ttype="class", print_tree=True
-                     ):
+    def sensi_ana_V0(
+        self,
+        inode,
+        setzero,
+        dimname,
+        lsize,
+        env,
+        best_tree,
+        std,  # params for eval_opct
+        ttype="class",
+        print_tree=True,
+    ):
         """
         Make a sensitivity analysis for node ``inode`` of OPCT in environment ``env``.
 
@@ -576,7 +599,9 @@ class SensitivityStrategy:
         :param print_tree
         :returns: data frame with columns 'dim', 'xf', 'reward_mean', 'reward_std', 'dim_value', 'dimname'
         """
-        assert not (best_tree.trees[0][inode].left == -1), f"Error: inode={inode} does not carry a split node!"
+        assert not (
+            best_tree.trees[0][inode].left == -1
+        ), f"Error: inode={inode} does not carry a split node!"
 
         if print_tree:
             print_treemodel(best_tree, 0, ttype=ttype)
@@ -589,7 +614,9 @@ class SensitivityStrategy:
 
         np_res = np.zeros(((ndim + 1) * (lsize + 1), 5))
         row = 0
-        restore_weights = np.copy(best_tree.trees[0][inode].split_weights.data.base[0])  # important: np.copy() !
+        restore_weights = np.copy(
+            best_tree.trees[0][inode].split_weights.data.base[0]
+        )  # important: np.copy() !
         for k in range(ndim):
             baseval = best_tree.trees[0][inode].split_weights.data.base[0][k]
             for j in range(ndim):
@@ -599,30 +626,48 @@ class SensitivityStrategy:
             if not setzero[k]:
                 for xf in np.linspace(-1, 2, lsize):
                     dim_value = baseval * xf
-                    print(f"\n Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):")
+                    print(
+                        f"\n Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):"
+                    )
                     best_tree.trees[0][inode].split_weights.data.base[0][k] = dim_value
-                    tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
+                    (
+                        tree_reward_mean,
+                        tree_reward_std,
+                        tree_samples,
+                    ) = self._evs.eval_opct(
                         env, best_tree, self._evs._n_tree_eval_eps, std
                     )
-                    np_res[row, :] = [k, xf, tree_reward_mean, tree_reward_std, dim_value]
+                    np_res[row, :] = [
+                        k,
+                        xf,
+                        tree_reward_mean,
+                        tree_reward_std,
+                        dim_value,
+                    ]
                     row = row + 1
 
-                    print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+                    print(
+                        f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+                    )
 
             # restore the original weights
             for j in range(ndim):
-                best_tree.trees[0][inode].split_weights.data.base[0][j] = restore_weights[j]
+                best_tree.trees[0][inode].split_weights.data.base[0][
+                    j
+                ] = restore_weights[j]
 
         # sweep over threshold t: vary in interval [t-w_bar,t+w_bar] with w_bar = mean weight of node
         w_bar = np.mean(np.abs(restore_weights))
         basethresh = best_tree.trees[0][inode].threshold
-        #for xf in np.linspace(-1, 2, lsize):       # option 0: not enough variation, becouse t too small
+        # for xf in np.linspace(-1, 2, lsize):       # option 0: not enough variation, becouse t too small
         #    dim_value = basethresh * xf
-        #for xf in np.linspace(-1, 1, lsize + 1):   # option 1: nominal t at xf=0 (different from nominal w_i at 1)
+        # for xf in np.linspace(-1, 1, lsize + 1):   # option 1: nominal t at xf=0 (different from nominal w_i at 1)
         #    dim_value = basethresh + w_bar * xf
-        for xf in np.linspace(0, 2, lsize + 1):     # option 2: nominal t at xf=1
+        for xf in np.linspace(0, 2, lsize + 1):  # option 2: nominal t at xf=1
             dim_value = basethresh - w_bar + w_bar * xf
-            print(f"\n Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf*100:.2f}%):")
+            print(
+                f"\n Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf*100:.2f}%):"
+            )
             best_tree.trees[0][inode].threshold = dim_value
             tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
                 env, best_tree, self._evs._n_tree_eval_eps, std
@@ -630,17 +675,28 @@ class SensitivityStrategy:
             np_res[row, :] = [ndim, xf, tree_reward_mean, tree_reward_std, dim_value]
             row = row + 1
 
-            print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+            print(
+                f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+            )
 
         # restore the original threshold:
         best_tree.trees[0][inode].threshold = basethresh
 
         return shape_df_res(np_res, row, dimname, std)
 
-    def sensi_ana_V1(self, inode, setzero, dimname, lsize,
-                     env, best_tree, std,  # params for eval_opct
-                     ttype="class", print_tree=True, w_factor=0.04
-                     ):
+    def sensi_ana_V1(
+        self,
+        inode,
+        setzero,
+        dimname,
+        lsize,
+        env,
+        best_tree,
+        std,  # params for eval_opct
+        ttype="class",
+        print_tree=True,
+        w_factor=0.04,
+    ):
         """
         --- The only differences to sensi_ana_V0 so far:
                 a) dim_value in weight loop with "+ signum0(b) * w_factor*w_bar/std[k] * xf"
@@ -672,7 +728,9 @@ class SensitivityStrategy:
         :param w_factor: a common factor applied to all w-ranges
         :returns: data frame with columns 'dim', 'xf', 'reward_mean', 'reward_std', 'dim_value', 'dimname'
         """
-        assert not (best_tree.trees[0][inode].left == -1), f"Error: inode={inode} does not carry a split node!"
+        assert not (
+            best_tree.trees[0][inode].left == -1
+        ), f"Error: inode={inode} does not carry a split node!"
 
         if print_tree:
             print_treemodel(best_tree, 0, ttype=ttype)
@@ -685,7 +743,9 @@ class SensitivityStrategy:
 
         np_res = np.zeros(((ndim + 1) * (lsize + 1), 5))
         row = 0
-        restore_weights = np.copy(best_tree.trees[0][inode].split_weights.data.base[0])  # important: np.copy() !
+        restore_weights = np.copy(
+            best_tree.trees[0][inode].split_weights.data.base[0]
+        )  # important: np.copy() !
         w_bar = np.mean(np.abs(restore_weights))
         for k in range(ndim):
             baseval = best_tree.trees[0][inode].split_weights.data.base[0][k]
@@ -694,27 +754,51 @@ class SensitivityStrategy:
                     best_tree.trees[0][inode].split_weights.data.base[0][j] = 0
 
             if not setzero[k]:
-                for xf in np.linspace(-1, 1, lsize + 1):  # why 'lsize+1'? - only with uneven number linspace includes 0
-                    dim_value = baseval + signum0(baseval) * w_factor * w_bar / std[k] * xf
-                    print(f"\n Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):")
+                for xf in np.linspace(
+                    -1, 1, lsize + 1
+                ):  # why 'lsize+1'? - only with uneven number linspace includes 0
+                    dim_value = (
+                        baseval + signum0(baseval) * w_factor * w_bar / std[k] * xf
+                    )
+                    print(
+                        f"\n Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):"
+                    )
                     best_tree.trees[0][inode].split_weights.data.base[0][k] = dim_value
-                    tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
+                    (
+                        tree_reward_mean,
+                        tree_reward_std,
+                        tree_samples,
+                    ) = self._evs.eval_opct(
                         env, best_tree, self._evs._n_tree_eval_eps, std
                     )
-                    np_res[row, :] = [k, xf, tree_reward_mean, tree_reward_std, dim_value]
+                    np_res[row, :] = [
+                        k,
+                        xf,
+                        tree_reward_mean,
+                        tree_reward_std,
+                        dim_value,
+                    ]
                     row = row + 1
 
-                    print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+                    print(
+                        f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+                    )
 
             # restore the original weights
             for j in range(ndim):
-                best_tree.trees[0][inode].split_weights.data.base[0][j] = restore_weights[j]
+                best_tree.trees[0][inode].split_weights.data.base[0][
+                    j
+                ] = restore_weights[j]
 
         # sweep over threshold t: vary in interval [t-w_bar,t+w_bar] with w_bar = mean of abs weights of node
         basethresh = best_tree.trees[0][inode].threshold
-        for xf in np.linspace(-1, 1, lsize + 1):  # why 'lsize+1'? - only with uneven number linspace includes 0
+        for xf in np.linspace(
+            -1, 1, lsize + 1
+        ):  # why 'lsize+1'? - only with uneven number linspace includes 0
             dim_value = basethresh + signum0(basethresh) * w_bar * xf
-            print(f"\n Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf*100:.2f}%):")
+            print(
+                f"\n Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf*100:.2f}%):"
+            )
             best_tree.trees[0][inode].threshold = dim_value
             tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
                 env, best_tree, self._evs._n_tree_eval_eps, std
@@ -722,16 +806,27 @@ class SensitivityStrategy:
             np_res[row, :] = [ndim, xf, tree_reward_mean, tree_reward_std, dim_value]
             row = row + 1
 
-            print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+            print(
+                f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+            )
 
         # restore the original threshold:
         best_tree.trees[0][inode].threshold = basethresh
 
         return shape_df_res(np_res, row, dimname, std)
 
-    def mult_node_sens_V0(self, inodes, setzero, dimname, lsize,
-                          env, best_tree, std,  # params for eval_opct
-                          ttype="class", print_tree=True):
+    def mult_node_sens_V0(
+        self,
+        inodes,
+        setzero,
+        dimname,
+        lsize,
+        env,
+        best_tree,
+        std,  # params for eval_opct
+        ttype="class",
+        print_tree=True,
+    ):
         """
         Make a sensitivity analysis for node list ``inodes`` of OPCT in environment ``env``. In contrast to
         ``sensi_ana_V0`` which returns a data frame for a specific node, this method operates on a node list
@@ -760,7 +855,9 @@ class SensitivityStrategy:
         :returns: data frame with columns 'dim', 'xf', 'reward_mean', 'reward_std', 'dim_value', 'dimname'
         """
         for inode in inodes:
-            assert not (best_tree.trees[0][inode].left == -1), f"Error: inode={inode} does not carry a split node!"
+            assert not (
+                best_tree.trees[0][inode].left == -1
+            ), f"Error: inode={inode} does not carry a split node!"
 
         if print_tree:
             print_treemodel(best_tree, 0, ttype=ttype)
@@ -774,10 +871,16 @@ class SensitivityStrategy:
 
         np_res = np.zeros(((ndim + 1) * (lsize + 1), 5))
         row = 0
-        restore_weights = [ np.copy(best_tree.trees[0][inode].split_weights.data.base[0]) for inode in inodes ]
-                            # important: np.copy() !
+        restore_weights = [
+            np.copy(best_tree.trees[0][inode].split_weights.data.base[0])
+            for inode in inodes
+        ]
+        # important: np.copy() !
         for k in range(ndim):
-            baseval = [ best_tree.trees[0][inode].split_weights.data.base[0][k] for inode in inodes ]
+            baseval = [
+                best_tree.trees[0][inode].split_weights.data.base[0][k]
+                for inode in inodes
+            ]
             for j in range(ndim):
                 if setzero[j]:
                     for inode in inodes:
@@ -790,32 +893,53 @@ class SensitivityStrategy:
                     for inode in inodes:
                         dim_value = baseval[inode] * xf
                         print(
-                            f" Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):")
-                        best_tree.trees[0][inode].split_weights.data.base[0][k] = dim_value
-                    tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
+                            f" Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):"
+                        )
+                        best_tree.trees[0][inode].split_weights.data.base[0][
+                            k
+                        ] = dim_value
+                    (
+                        tree_reward_mean,
+                        tree_reward_std,
+                        tree_samples,
+                    ) = self._evs.eval_opct(
                         env, best_tree, self._evs._n_tree_eval_eps, std
                     )
-                    np_res[row, :] = [k, xf, tree_reward_mean, tree_reward_std, dim_value]
+                    np_res[row, :] = [
+                        k,
+                        xf,
+                        tree_reward_mean,
+                        tree_reward_std,
+                        dim_value,
+                    ]
                     row = row + 1
 
-                    print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+                    print(
+                        f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+                    )
 
             # restore the original weights
             for inode in inodes:
                 for j in range(ndim):
-                    best_tree.trees[0][inode].split_weights.data.base[0][j] = restore_weights[inode][j]
+                    best_tree.trees[0][inode].split_weights.data.base[0][
+                        j
+                    ] = restore_weights[inode][j]
 
         # sweep over threshold t: vary in interval [t-w_bar,t+w_bar] with w_bar = mean weight of node
-        w_bar = [ np.mean(np.abs(restore_weights[inode])) for inode in inodes ]
-        basethresh = [ best_tree.trees[0][inode].threshold for inode in inodes ]
-        #for xf in np.linspace(-1, 1, lsize + 1):   # option 1: nominal t at xf=0
-        for xf in np.linspace(0, 2, lsize + 1):     # option 2: nominal t at xf=1
+        w_bar = [np.mean(np.abs(restore_weights[inode])) for inode in inodes]
+        basethresh = [best_tree.trees[0][inode].threshold for inode in inodes]
+        # for xf in np.linspace(-1, 1, lsize + 1):   # option 1: nominal t at xf=0
+        for xf in np.linspace(0, 2, lsize + 1):  # option 2: nominal t at xf=1
             print()
             dim_value = 0
             for inode in inodes:
-                #dim_value = basethresh[inode] + w_bar[inode] * xf                  # option 1
-                dim_value = basethresh[inode] - w_bar[inode] + w_bar[inode] * xf    # option 2
-                print(f" Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf * 100:.2f}%):")
+                # dim_value = basethresh[inode] + w_bar[inode] * xf                  # option 1
+                dim_value = (
+                    basethresh[inode] - w_bar[inode] + w_bar[inode] * xf
+                )  # option 2
+                print(
+                    f" Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf * 100:.2f}%):"
+                )
                 best_tree.trees[0][inode].threshold = dim_value
             tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
                 env, best_tree, self._evs._n_tree_eval_eps, std
@@ -825,7 +949,9 @@ class SensitivityStrategy:
 
             if print_tree:
                 print_treemodel(best_tree, 0, ttype=ttype)
-            print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+            print(
+                f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+            )
 
         # restore the original threshold:
         for inode in inodes:
@@ -833,10 +959,19 @@ class SensitivityStrategy:
 
         return shape_df_res(np_res, row, dimname, std)
 
-    def mult_node_sens_V1(self, inodes, setzero, dimname, lsize,
-                          env, best_tree, std,  # params for eval_opct
-                          ttype="class", print_tree=True, w_factor=0.04
-                          ):
+    def mult_node_sens_V1(
+        self,
+        inodes,
+        setzero,
+        dimname,
+        lsize,
+        env,
+        best_tree,
+        std,  # params for eval_opct
+        ttype="class",
+        print_tree=True,
+        w_factor=0.04,
+    ):
         """
         --- The only differences to mult_node_sens_V0 so far:
                 a) dim_value in weight loop with "+ signum0(b) *w_factor*w_bar[inode]/std[k] * xf" and
@@ -873,7 +1008,9 @@ class SensitivityStrategy:
         :returns: data frame with columns 'dim', 'xf', 'reward_mean', 'reward_std', 'dim_value', 'dimname'
         """
         for inode in inodes:
-            assert not (best_tree.trees[0][inode].left == -1), f"Error: inode={inode} does not carry a split node!"
+            assert not (
+                best_tree.trees[0][inode].left == -1
+            ), f"Error: inode={inode} does not carry a split node!"
 
         if print_tree:
             print_treemodel(best_tree, 0, ttype=ttype)
@@ -887,48 +1024,78 @@ class SensitivityStrategy:
 
         np_res = np.zeros(((ndim + 1) * (lsize + 1), 5))
         row = 0
-        restore_weights = [np.copy(best_tree.trees[0][inode].split_weights.data.base[0]) for inode in
-                           inodes]  # important: np.copy() !
-        w_bar = [ np.mean(np.abs(restore_weights[inode])) for inode in inodes]
+        restore_weights = [
+            np.copy(best_tree.trees[0][inode].split_weights.data.base[0])
+            for inode in inodes
+        ]  # important: np.copy() !
+        w_bar = [np.mean(np.abs(restore_weights[inode])) for inode in inodes]
         for k in range(ndim):
-            baseval = [best_tree.trees[0][inode].split_weights.data.base[0][k] for inode in inodes]
+            baseval = [
+                best_tree.trees[0][inode].split_weights.data.base[0][k]
+                for inode in inodes
+            ]
             for j in range(ndim):
                 if setzero[j]:
                     for inode in inodes:
                         best_tree.trees[0][inode].split_weights.data.base[0][j] = 0
 
             if not setzero[k]:
-                for xf in np.linspace(-1, 1, lsize + 1):  # why 'lsize+1'? - only with uneven number linspace includes 0
+                for xf in np.linspace(
+                    -1, 1, lsize + 1
+                ):  # why 'lsize+1'? - only with uneven number linspace includes 0
                     print()
                     dim_value = 0
                     for inode in inodes:
                         b = baseval[inode]
-                        dim_value = b + signum0(b) * w_factor * w_bar[inode] / std[k] * xf
+                        dim_value = (
+                            b + signum0(b) * w_factor * w_bar[inode] / std[k] * xf
+                        )
                         print(
-                            f" Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):")
-                        best_tree.trees[0][inode].split_weights.data.base[0][k] = dim_value
-                    tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
+                            f" Setting node {inode} weight for dimension {k} ({dimname[k]}) to {dim_value:.4f} (xf={xf * 100:.2f}%):"
+                        )
+                        best_tree.trees[0][inode].split_weights.data.base[0][
+                            k
+                        ] = dim_value
+                    (
+                        tree_reward_mean,
+                        tree_reward_std,
+                        tree_samples,
+                    ) = self._evs.eval_opct(
                         env, best_tree, self._evs._n_tree_eval_eps, std
                     )
-                    np_res[row, :] = [k, xf, tree_reward_mean, tree_reward_std, dim_value]
+                    np_res[row, :] = [
+                        k,
+                        xf,
+                        tree_reward_mean,
+                        tree_reward_std,
+                        dim_value,
+                    ]
                     row = row + 1
 
-                    print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+                    print(
+                        f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+                    )
 
             # restore the original weights
             for inode in inodes:
                 for j in range(ndim):
-                    best_tree.trees[0][inode].split_weights.data.base[0][j] = restore_weights[inode][j]
+                    best_tree.trees[0][inode].split_weights.data.base[0][
+                        j
+                    ] = restore_weights[inode][j]
 
         # sweep over threshold t: vary in interval [t-w_bar,t+w_bar] with w_bar = mean abs weights of node
         basethresh = [best_tree.trees[0][inode].threshold for inode in inodes]
-        for xf in np.linspace(-1, 1, lsize + 1):  # why 'lsize+1'? - only with uneven number linspace includes 0
+        for xf in np.linspace(
+            -1, 1, lsize + 1
+        ):  # why 'lsize+1'? - only with uneven number linspace includes 0
             print()
             dim_value = 0
             for inode in inodes:
                 b = basethresh[inode]
                 dim_value = b + signum0(b) * w_bar[inode] * xf
-                print(f" Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf * 100:.2f}%):")
+                print(
+                    f" Setting the threshold for node {inode} to {dim_value:.4f} (xf = {xf * 100:.2f}%):"
+                )
                 best_tree.trees[0][inode].threshold = dim_value
             tree_reward_mean, tree_reward_std, tree_samples = self._evs.eval_opct(
                 env, best_tree, self._evs._n_tree_eval_eps, std
@@ -936,7 +1103,9 @@ class SensitivityStrategy:
             np_res[row, :] = [ndim, xf, tree_reward_mean, tree_reward_std, dim_value]
             row = row + 1
 
-            print(f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})")
+            print(
+                f"*** mean tree reward: {tree_reward_mean:.4f} ***   (solved: >= {self._evs.reward_solved})"
+            )
 
         # restore the original threshold:
         for inode in inodes:
@@ -945,7 +1114,9 @@ class SensitivityStrategy:
         return shape_df_res(np_res, row, dimname, std)
 
 
-def plot_sensitivity(df_res, pngdir, pngname, title=None, ylim=None, first_levels=None, last_levels=None):
+def plot_sensitivity(
+    df_res, pngdir, pngname, title=None, ylim=None, first_levels=None, last_levels=None
+):
     """
     Plot sensitivity curves from ``df_res`` (as generated by ``sensitivity_analysis`` or ``multi_node_sensitivity``)
     and store the plot in ``pngdir/pngname``.
@@ -966,40 +1137,45 @@ def plot_sensitivity(df_res, pngdir, pngname, title=None, ylim=None, first_level
     # into the last rows of the DataFrame. This ensures that sensitivity plots with and w/o these levels have the same
     # colors in the other levels (including level 'thresh')
     data1 = df_res.copy()
-    data1['dimname2'] = data1['dimname']
+    data1["dimname2"] = data1["dimname"]
     if first_levels != None:
         for level in first_levels:
-            data1.loc[data1.dimname == level,'dimname2'] = 'aa_'+level
+            data1.loc[data1.dimname == level, "dimname2"] = "aa_" + level
     if last_levels != None:
         for level in last_levels:
-            data1.loc[data1.dimname == level,'dimname2'] = 'zz_'+level
-    data1 = data1.sort_values('dimname2')       # sort such that last_levels are at end, the others alphabetically
+            data1.loc[data1.dimname == level, "dimname2"] = "zz_" + level
+    data1 = data1.sort_values(
+        "dimname2"
+    )  # sort such that last_levels are at end, the others alphabetically
 
     # level 'thresh' gets a dotted line, all other solid lines.
-    lev = data1['dimname'].unique()
-    nthresh = np.flatnonzero(lev=='thresh')[0]
-    dashes = ['' for _ in range(len(lev))]      # solid
-    dashes[nthresh] = (1, 3)                    # dotted for the level of 'dimname' containing 'thresh'
+    lev = data1["dimname"].unique()
+    nthresh = np.flatnonzero(lev == "thresh")[0]
+    dashes = ["" for _ in range(len(lev))]  # solid
+    dashes[nthresh] = (1, 3)  # dotted for the level of 'dimname' containing 'thresh'
 
     sns.lineplot(
         data=data1,
         x="xf",
         y="reward_mean",
-        hue="dimname"
-        , style="dimname"
-        , dashes=dashes
+        hue="dimname",
+        style="dimname",
+        dashes=dashes
         # ,palette=sns.color_palette("viridis", n_colors=4)
-        , ax=ax1
+        ,
+        ax=ax1,
     )
-    ax1.legend(loc='lower right', shadow=True, fontsize=14)
-    #ax1.labelsize
-    plt.xlabel('factor ', fontsize=16)          # normal fontsize 12. For smaller paper figures,
-    plt.ylabel('mean return', fontsize=16)      # use fontsize 14 or 16
-    plt.xticks(fontsize=14)                     #
-    plt.yticks(fontsize=14)                     #
-    #plt.locator_params(axis='x', nbins=5)      # for the larger font it is better to have only 5 x-ticks (only V1)
-    if title: plt.title(title)
-    if ylim: plt.ylim(ylim)
+    ax1.legend(loc="lower right", shadow=True, fontsize=14)
+    # ax1.labelsize
+    plt.xlabel("factor ", fontsize=16)  # normal fontsize 12. For smaller paper figures,
+    plt.ylabel("mean return", fontsize=16)  # use fontsize 14 or 16
+    plt.xticks(fontsize=14)  #
+    plt.yticks(fontsize=14)  #
+    # plt.locator_params(axis='x', nbins=5)      # for the larger font it is better to have only 5 x-ticks (only V1)
+    if title:
+        plt.title(title)
+    if ylim:
+        plt.ylim(ylim)
     if not os.path.exists(pngdir):
         os.mkdir(pngdir)
     pngname = pngdir + "/" + pngname
@@ -1009,7 +1185,9 @@ def plot_sensitivity(df_res, pngdir, pngname, title=None, ylim=None, first_level
     # plt.show()
 
 
-def generate_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix='', ylim=None, last_levels=None):
+def generate_sens_pkls(
+    ses: SensitivityStrategy, inodes, setzeros, prefix="", ylim=None, last_levels=None
+):
     """
     Loop over all node numbers in ``inodes`` and all lists ``setzero`` in ``setzeros`` and call
     ``ses.sensitivity_analysis(inode,setzero)`` for them to generate data frames ``df_res``.
@@ -1030,7 +1208,7 @@ def generate_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix='', yl
     """
     df_res_dict = {}
     for inode in inodes:
-        str_inode = f"n{inode}"     # the key for the dict
+        str_inode = f"n{inode}"  # the key for the dict
         df_res_lst = []
         for setzero in setzeros:
             pklfile = f"pkl/df_res_{str_inode}_"
@@ -1040,15 +1218,18 @@ def generate_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix='', yl
 
             df_res = ses.sensitivity_analysis(inode, setzero)
 
-            if not os.path.exists("pkl"): os.mkdir("pkl")
+            if not os.path.exists("pkl"):
+                os.mkdir("pkl")
             df_res.to_pickle(pklfile)
             print(f"Saved results 'df_res' to {pklfile}")
             # print(df_res)
 
-            pngfile = pklfile.replace('pkl/df_res', prefix + 'rew_sens')
-            pngfile = pngfile.replace('.pkl', '.png')
+            pngfile = pklfile.replace("pkl/df_res", prefix + "rew_sens")
+            pngfile = pngfile.replace(".pkl", ".png")
 
-            plot_sensitivity(df_res, 'png_sens/', pngfile, ylim=ylim, last_levels=last_levels)
+            plot_sensitivity(
+                df_res, "png_sens/", pngfile, ylim=ylim, last_levels=last_levels
+            )
             df_res_lst.append(df_res)
         inode_dict = {str_inode: df_res_lst}
         df_res_dict.update(inode_dict)
@@ -1056,8 +1237,15 @@ def generate_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix='', yl
     return df_res_dict  # return dictionary of df_res, one key for each inode
 
 
-def generate_multi_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix='',
-                             ylim=None, first_levels=None, last_levels=None):
+def generate_multi_sens_pkls(
+    ses: SensitivityStrategy,
+    inodes,
+    setzeros,
+    prefix="",
+    ylim=None,
+    first_levels=None,
+    last_levels=None,
+):
     """
     Loop over all lists ``setzero`` in ``setzeros`` and call
     ``ses.multi_node_sensitivity(inodes, setzero)`` for them to generate a data frame ``df_res``.
@@ -1080,26 +1268,34 @@ def generate_multi_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix=
     df_res_dict = {}
     str_inode = "n"
     for inode in inodes:
-        str_inode = f"{str_inode}-{inode}"     # the key for the dict
+        str_inode = f"{str_inode}-{inode}"  # the key for the dict
 
     df_res_lst = []
     for setzero in setzeros:
         pklfile = f"pkl/df_res__{str_inode}__"
         for s in setzero:
             pklfile = f"{pklfile}{int(not s)}"
-        pklfile = f"{pklfile}.pkl"            # e.g. pklfile = 'pkl/df_res__n-0-1-2__101101.pkl'
+        pklfile = f"{pklfile}.pkl"  # e.g. pklfile = 'pkl/df_res__n-0-1-2__101101.pkl'
 
         df_res = ses.multi_node_sensitivity(inodes, setzero)
 
-        if not os.path.exists("pkl"): os.mkdir("pkl")
+        if not os.path.exists("pkl"):
+            os.mkdir("pkl")
         df_res.to_pickle(pklfile)
         print(f"Saved results 'df_res' to {pklfile}")
         # print(df_res)
 
-        pngfile = pklfile.replace('pkl/df_res', prefix + 'rew_sens')
-        pngfile = pngfile.replace('.pkl', '.png')
+        pngfile = pklfile.replace("pkl/df_res", prefix + "rew_sens")
+        pngfile = pngfile.replace(".pkl", ".png")
 
-        plot_sensitivity(df_res, 'png_sens/', pngfile, ylim=ylim, first_levels=first_levels, last_levels=last_levels)
+        plot_sensitivity(
+            df_res,
+            "png_sens/",
+            pngfile,
+            ylim=ylim,
+            first_levels=first_levels,
+            last_levels=last_levels,
+        )
         df_res_lst.append(df_res)
     inode_dict = {str_inode: df_res_lst}
     df_res_dict.update(inode_dict)
@@ -1107,7 +1303,7 @@ def generate_multi_sens_pkls(ses: SensitivityStrategy, inodes, setzeros, prefix=
     return df_res_dict  # return dictionary of df_res, one key for each inode
 
 
-def generate_sens_plots(prefix='', ylim=None, first_levels=None, last_levels=None):
+def generate_sens_plots(prefix="", ylim=None, first_levels=None, last_levels=None):
     """
     Loop over all pickle files in ``pkl/``, load their contents ``df_res`` and generate the sensitivity plots in
     directory ``png_sens/``.
@@ -1119,15 +1315,22 @@ def generate_sens_plots(prefix='', ylim=None, first_levels=None, last_levels=Non
     :return: dictionary with pkl filenames as keys and lists [df_res] as values
     """
     df_res_dict = {}
-    files = os.listdir('pkl')
+    files = os.listdir("pkl")
     for pklname in files:
-        pklfile = 'pkl/'+pklname
+        pklfile = "pkl/" + pklname
         df_res = pd.read_pickle(pklfile)
 
-        pngfile = pklfile.replace('pkl/df_res', prefix + 'rew_sens')
-        pngfile = pngfile.replace('.pkl', '.png')
+        pngfile = pklfile.replace("pkl/df_res", prefix + "rew_sens")
+        pngfile = pngfile.replace(".pkl", ".png")
 
-        plot_sensitivity(df_res, 'png_sens/', pngfile, ylim=ylim, first_levels=first_levels, last_levels=last_levels)
+        plot_sensitivity(
+            df_res,
+            "png_sens/",
+            pngfile,
+            ylim=ylim,
+            first_levels=first_levels,
+            last_levels=last_levels,
+        )
 
         inner_dict = {pklname: [df_res]}
         df_res_dict.update(inner_dict)
@@ -1170,8 +1373,10 @@ def print_tree(tree, inode=0, ttype="class"):
             )
         )
 
+
 def print_treemodel(model, inode=0, ttype="class"):
     return print_tree(model.trees[0], inode, ttype)
+
 
 def print_node_rule(inode, node, comp):
     print(
@@ -1232,7 +1437,7 @@ def get_dist_from_point(x, pnt):
     """
     delta = x - pnt
     dist = np.sum(delta * delta, axis=1)
-    dist = dist ** 0.5
+    dist = dist**0.5
     return dist
 
 

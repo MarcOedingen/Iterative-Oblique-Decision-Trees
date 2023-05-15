@@ -21,7 +21,9 @@ if __name__ == "__main__":
     best_carts = np.empty((max_depth, numb_runs), dtype=object)
     reward_threshold = le.LunarLanderEnvironment().get_reward_threshold()
     ll_env = le.LunarLanderEnvironment().get_environment()
-    ppo_ll = lo.PPO_Oracle().load_model(le.LunarLanderEnvironment().get_environmentShort())
+    ppo_ll = lo.PPO_Oracle().load_model(
+        le.LunarLanderEnvironment().get_environmentShort()
+    )
 
     print(
         "----------------------Starting experiment for LunarLander-v2 Episode samples with CART----------------------"
@@ -38,7 +40,9 @@ if __name__ == "__main__":
             time_start_cart = time.time()
             for j in range(numb_trees):
                 ll_cart = DecisionTreeClassifier(max_depth=i + 1)
-                ll_cart.fit(ll_samples.iloc[:, :-1].values, ll_samples.iloc[:, -1].values)
+                ll_cart.fit(
+                    ll_samples.iloc[:, :-1].values, ll_samples.iloc[:, -1].values
+                )
                 _, cart_rewards = p_utils.eval_cart_class(
                     tree=ll_cart,
                     env=ll_env,
@@ -63,10 +67,12 @@ if __name__ == "__main__":
         time_run[k] = time.time() - time_start_run
     p_utils.save_results("LunarLander-v2", rewards_cart, rewards_oracle, method="CART")
     p_utils.save_best_cart(
-        best_carts, rewards_cart, reward_threshold, env_name="LunarLander-v2", method="CART"
+        best_carts,
+        rewards_cart,
+        reward_threshold,
+        env_name="LunarLander-v2",
+        method="CART",
     )
     p_utils.save_timings_samples(
         time_run, time_cart, samples_cart, env_name="LunarLander-v2", method="CART"
     )
-
-

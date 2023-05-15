@@ -38,7 +38,9 @@ if __name__ == "__main__":
             time_start_cart = time.time()
             for j in range(numb_trees):
                 ab_cart = DecisionTreeClassifier(max_depth=i + 1)
-                ab_cart.fit(ab_samples.iloc[:, :-1].values, ab_samples.iloc[:, -1].values)
+                ab_cart.fit(
+                    ab_samples.iloc[:, :-1].values, ab_samples.iloc[:, -1].values
+                )
                 _, cart_rewards = p_utils.eval_cart_class(
                     tree=ab_cart,
                     env=ab_env,

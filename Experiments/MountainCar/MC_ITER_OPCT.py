@@ -88,18 +88,17 @@ if __name__ == "__main__":
             found = False
             print(j)
             for p in range(len(trees)):
-                if (j == 0 and -105 <= trees[p]['reward'] <= -99) or (j == 1 and -107 <= trees[p]['reward'] <= -102):
+                if (j == 0 and -105 <= trees[p]["reward"] <= -99) or (
+                    j == 1 and -107 <= trees[p]["reward"] <= -102
+                ):
                     print("Found a good tree")
-                    pickle.dump(trees[p]['opct'], open(f"OPCT_{j}_{i}.pkl", "wb"))
+                    pickle.dump(trees[p]["opct"], open(f"OPCT_{j}_{i}.pkl", "wb"))
                     found = True
             if found:
                 break
         time_run[i] = time.time() - time_start_run
 
-
-
-
-    '''
+    """
     p_utils.save_results("MountainCar-v0", rewards_opct, rewards_oracle, method="ITER")
     p_utils.save_best_opct(
         best_opcts,
@@ -111,4 +110,4 @@ if __name__ == "__main__":
     p_utils.save_timings_samples(
         time_run, time_opct, samples_opct, env_name="MountainCar-v0", method="ITER"
     )
-    '''
+    """

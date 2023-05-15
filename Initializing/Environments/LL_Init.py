@@ -155,7 +155,7 @@ class LunarLanderBB(gym.Env, EzPickle):
             alpha = gym_start_space[4]
             omega = gym_start_space[5]
 
-            x_b2d = (x+1) * VIEWPORT_W / SCALE / 2
+            x_b2d = (x + 1) * VIEWPORT_W / SCALE / 2
             y_b2d = y * VIEWPORT_H / SCALE / 2 + self.helipad_y + LEG_DOWN / SCALE
             velx_b2d = v_x * FPS / (VIEWPORT_W / SCALE / 2)
             vely_b2d = v_y * FPS / (VIEWPORT_H / SCALE / 2)
@@ -208,7 +208,6 @@ class LunarLanderBB(gym.Env, EzPickle):
         self.lander.color1 = (0.5, 0.4, 0.9)
         self.lander.color2 = (0.3, 0.3, 0.5)
 
-
         self.legs = []
         for i in [-1, +1]:
             if start_state is not None:
@@ -249,9 +248,7 @@ class LunarLanderBB(gym.Env, EzPickle):
                 motorSpeed=+0.3 * i,
             )
             if i == -1:
-                rjd.lowerAngle = (
-                    +0.9 - 0.5
-                )
+                rjd.lowerAngle = +0.9 - 0.5
                 rjd.upperAngle = +0.9
             else:
                 rjd.lowerAngle = -0.9
@@ -308,9 +305,7 @@ class LunarLanderBB(gym.Env, EzPickle):
                 assert m_power >= 0.5 and m_power <= 1.0
             else:
                 m_power = 1.0
-            ox = (
-                tip[0] * (4 / SCALE + 2 * dispersion[0]) + side[0] * dispersion[1]
-            )
+            ox = tip[0] * (4 / SCALE + 2 * dispersion[0]) + side[0] * dispersion[1]
             oy = -tip[1] * (4 / SCALE + 2 * dispersion[0]) - side[1] * dispersion[1]
             impulse_pos = (self.lander.position[0] + ox, self.lander.position[1] + oy)
             p = self._create_particle(
@@ -391,9 +386,7 @@ class LunarLanderBB(gym.Env, EzPickle):
             reward = shaping - self.prev_shaping
         self.prev_shaping = shaping
 
-        reward -= (
-            m_power * 0.30
-        )
+        reward -= m_power * 0.30
         reward -= s_power * 0.03
 
         done = False

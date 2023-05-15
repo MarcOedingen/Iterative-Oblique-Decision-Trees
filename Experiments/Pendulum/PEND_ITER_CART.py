@@ -80,7 +80,9 @@ if __name__ == "__main__":
             best_carts[j, i] = copy.deepcopy(best_cart)
             samples_cart[j, i] = len(c_samples_iter)
         time_run[i] = time.time() - time_start_run
-    p_utils.save_results("Pendulum-v1", rewards_cart, rewards_oracle, method="ITER_CART")
+    p_utils.save_results(
+        "Pendulum-v1", rewards_cart, rewards_oracle, method="ITER_CART"
+    )
     p_utils.save_best_cart(
         best_carts,
         rewards_cart,
@@ -91,5 +93,3 @@ if __name__ == "__main__":
     p_utils.save_timings_samples(
         time_run, time_cart, samples_cart, env_name="Pendulum-v1", method="ITER_CART"
     )
-
-

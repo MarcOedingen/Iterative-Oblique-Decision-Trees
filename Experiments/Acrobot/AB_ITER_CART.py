@@ -25,9 +25,7 @@ if __name__ == "__main__":
     best_carts = np.empty((max_depth, numb_runs), dtype=object)
     reward_threshold = le.AcrobotEnvironment().get_reward_threshold()
     env = le.AcrobotEnvironment().get_environment()
-    oracle = lo.DQN_Oracle().load_model(
-        le.AcrobotEnvironment().get_environmentShort()
-    )
+    oracle = lo.DQN_Oracle().load_model(le.AcrobotEnvironment().get_environmentShort())
 
     print(
         "----------------------Starting experiment for Acrobot-v1 Iterative samples with CART----------------------"
@@ -57,7 +55,7 @@ if __name__ == "__main__":
                     depth=j + 1,
                     env=env,
                     t_eval_eps=t_eval_eps,
-                    new_samples_iter=new_samples_iter
+                    new_samples_iter=new_samples_iter,
                 )
                 if reward > best_reward:
                     best_cart = copy.deepcopy(cart)
