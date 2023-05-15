@@ -1,0 +1,12 @@
+# Install via: pip install -r requirements.txt
+Box2D==2.3.2
+box2d-py==2.3.8
+gym==0.21.0
+matplotlib==3.6.3
+numpy==1.24.2
+pandas==1.3.2
+pickleshare==0.7.5
+scikit-learn== 1.1.1
+scipy== 1.7.1
+spyct-tstepi== 1.0
+stable-baselines3==1.4.0
