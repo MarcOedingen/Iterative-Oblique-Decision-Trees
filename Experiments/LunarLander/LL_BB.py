@@ -20,7 +20,7 @@ if __name__ == "__main__":
     best_opcts = np.empty((max_depth, numb_runs), dtype=object)
     reward_threshold = le.LunarLanderEnvironment().get_reward_threshold()
     ll_env = le.LunarLanderEnvironment().get_environment()
-    ll_init_env = le.LunarLanderHeatmapEnvironment().get_environment()
+    ll_init_env = le.LunarLandeBoundingBoxEnvironment().get_environment()
     ppo_ll = lo.PPO_Oracle().load_model(
         le.LunarLanderEnvironment().get_environmentShort()
     )
