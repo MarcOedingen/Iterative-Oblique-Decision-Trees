@@ -43,3 +43,8 @@ After running an experiment, the results are stored in different subfolders in t
 * OPCTs: Contains the Oblique Predictive Clustering Trees solving an environment for experiments X_1, X_4, and X_5.
 * Rewards_NPZ: Contains the rewards of trees and oracles solving an environment for experiments X_1, ..., X_5.
 * Times_Samples: Contains the times and samples of trees solving an environment for experiments X_1, ..., X_5.
+
+## `Reproduction_Verma2018`
+This directory contains scripts to reproduce results published in
+Verma, A., Murali, V., Singh, R., Kohli, P. & Chaudhuri, S.. (2018). Programmatically Interpretable Reinforcement Learning. <em>Proceedings of the 35th International Conference on Machine Learning</em>, in <em>Proceedings of Machine Learning Research</em> 80:5045-5054 Available from https://proceedings.mlr.press/v80/verma18a.html.
+
