@@ -1,6 +1,7 @@
 import gym
 from abc import ABC, abstractmethod
 from Initializing.Environments.LL_Init import LunarLanderBB
+from Initializing.Environments.Pend2D_Wrapper import PendObs2DWrapper
 from Initializing.Environments.CPSU_discrete import CartPoleSwingUpV1
 
 
@@ -75,18 +76,6 @@ class MountainCarContinuousEnvironment(EnvironmentStrategy):
     def get_reward_threshold(self):
         return 90
 
-
-class Pendulumv1Environment(EnvironmentStrategy):
-    def get_environmentShort(self):
-        return "pend"
-
-    def get_environment(self):
-        return gym.make("Pendulum-v1")
-
-    def get_reward_threshold(self):
-        return -170
-
-
 class LunarLanderEnvironment(EnvironmentStrategy):
     def get_environmentShort(self):
         return "ll"
@@ -109,3 +98,23 @@ class LunarLandeBoundingBoxEnvironment(EnvironmentStrategy):
 
     def get_reward_threshold(self):
         return 200
+
+class Pendulumv1Environment(EnvironmentStrategy):
+    def get_environmentShort(self):
+        return "pend"
+
+    def get_environment(self):
+        return gym.make("Pendulum-v1")
+
+    def get_reward_threshold(self):
+        return -170
+
+class Pendulum2DEnvironment(EnvironmentStrategy):
+    def get_environmentShort(self):
+        return "pend2d"
+
+    def get_environment(self):
+        return PendObs2DWrapper(gym.make("Pendulum-v1"))
+
+    def get_reward_threshold(self):
+        return -200

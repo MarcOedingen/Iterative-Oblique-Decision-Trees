@@ -372,6 +372,36 @@ def get_best_reg_opct(
             )
     return best_tree, best_samples, best_reward, best_std
 
+def get_best_reg_opct_eps(
+    num_trees, c_samples_iter, depth, env, t_eval_eps, new_samples_iter
+):
+    best_tree, best_samples, best_reward, best_std = (
+        None,
+        None,
+        -np.inf,
+        -np.inf,
+    )
+    trees = np.empty(num_trees, dtype=object)
+    best_samples_eps = None
+    for l in range(num_trees):
+        trees[l] = make_opct_reg(c_samples_iter, depth)
+        tree_samples, tree_rewards, samples_tot = eval_opct_reg_eps(
+            opct=trees[l],
+            env=env,
+            columns=c_samples_iter.columns,
+            num_episodes=t_eval_eps,
+            new_samples=new_samples_iter,
+        )
+        if best_tree is None or np.mean(tree_rewards) > best_reward:
+            best_tree, best_samples, best_reward, best_std = (
+                copy.deepcopy(trees[l]),
+                tree_samples,
+                np.mean(tree_rewards),
+                np.std(tree_rewards),
+            )
+            best_samples_eps = samples_tot
+    return best_tree, best_samples, best_reward, best_std, best_samples_eps
+
 
 def eval_opct_class_fixState(env, opct, states, num_episodes=100):
     observations = []
@@ -457,6 +487,35 @@ def eval_opct_reg(opct, env, columns, num_episodes=100, new_samples=np.inf):
         samples = samples.sample(n=new_samples)
     return samples, rewards
 
+def eval_opct_reg_eps(opct, env, columns, num_episodes=100, new_samples=np.inf):
+    observations = []
+    actions = []
+    rewards = []
+    samples_tot = []
+    for _ in range(num_episodes):
+        state = env.reset()
+        done = False
+        reward_sum = 0
+        samples_eps = []
+        while not done:
+            action = opct.predict(state.reshape(1, -1))[0]
+            observations.append(state)
+            samples_eps.append(state)
+            actions.append(action)
+            state, reward, done, _ = env.step(action)
+            reward_sum += reward
+        rewards.append(reward_sum)
+        samples_tot.append(samples_eps)
+    samples = pd.DataFrame(
+        np.concatenate(
+            (np.array(observations), np.array(actions).reshape(-1, 1)), axis=1
+        ),
+        columns=columns,
+    )
+    if new_samples < len(samples):
+        samples = samples.sample(n=new_samples)
+    return samples, rewards, samples_tot
+
 
 def eval_cart_class(tree, env, columns, num_episodes=100, new_samples=np.inf):
     observations = []
@@ -508,6 +567,12 @@ def eval_cart_reg(tree, env, columns, num_episodes=100, new_samples=np.inf):
     if new_samples < len(samples):
         samples = samples.sample(n=new_samples)
     return samples, rewards
+
+
+def plot_episodes(oracle_samples, opct_samples, iterations):
+    fig, ax = plt.subplots(1, iterations + 1, figsize=((iterations+1)*3, 5))
+    # Plot the episodes
+
 
 
 def signum0(val):

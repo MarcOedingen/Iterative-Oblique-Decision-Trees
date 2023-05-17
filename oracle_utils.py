@@ -502,6 +502,41 @@ def evaluate_oracle_pend2d(model, env, num_episodes=100):
         rewards,
     )
 
+def evaluate_oracle_pend2d_steps(model, env, num_samples=int(3e4)):
+    thetas = []
+    omegas = []
+    actions = []
+    rewards = []
+    episode_samples = []
+    while True:
+        state = env.reset()
+        done = False
+        reward_sum = 0
+        samples = []
+        while not done:
+            action, _ = model.predict(state)
+            thetas.append(state[0])
+            omegas.append(state[1])
+            samples.append(state)
+            actions.append(action)
+            state, reward, done, _ = env.step(action)
+            reward_sum += reward
+        rewards.append(reward_sum)
+        episode_samples.append(samples)
+        if len(actions) >= num_samples:
+            break
+    return (
+        pd.DataFrame(
+            {
+                "theta": thetas,
+                "omega": omegas,
+                "action": actions,
+            }
+        ),
+        rewards,
+        episode_samples
+    )
+
 
 def evaluate_oracle_ll(model, env, num_episodes=100):
     xs = []
